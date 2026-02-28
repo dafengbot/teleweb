@@ -225,7 +225,7 @@ function attachCopyHandler(el, text) {
   // 读取 posts.json
   let posts = [];
   try {
-    const res = await fetch('/Tonsite/posts.json?ts=' + Date.now(), { cache: 'no-store' });
+    const res = await fetch('posts.json?ts=' + Date.now(), { cache: 'no-store' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     posts = await res.json();
     if (!Array.isArray(posts)) throw new Error('posts.json 必须是数组');
