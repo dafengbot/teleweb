@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>51888.ton</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="icon" href="favicon.png">
+  <!-- 引入外部CSS -->
+  <link rel="stylesheet" href="style.css">
+
+  <script src="theme-init.js"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="sticky-header" role="banner">
+      <div class="topbar" role="navigation" aria-label="site header">
+        <div class="brand">
+          <img src="favicon.png" alt="logo" class="brand-logo" oncontextmenu="return false" draggable="false">
+        </div>
+        <div class="title-wrap">
+          <div class="title">这搜 — 中文导航</div>
+          <div class="subtitle">51888.ton</div>
+        </div>
+        <button id="themeToggle" class="icon-btn" aria-label="切换主题">🌓</button>
+      </div>
+    </div>
+
+    <div id="mainContent">
+      <div class="pinned" role="region" aria-label="公告">
+        <div class="announce-icon" aria-hidden="true">📣</div>
+        <div class="announce-text">永久域名： <strong>51888.ton</strong></div>
+        <div style="margin-left:auto">
+          <button id="copyDomain" class="icon-btn" title="复制域名">🔗</button>
+        </div>
+      </div>
+
+      <div id="feed" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div id="copyToast" class="copy-tip" role="status" aria-live="polite">已复制到剪贴板</div>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,338 @@
+:root {
+  --bg1: #eaf4ff;
+  --bg2: #fff2e6;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --line: #e5e7eb;
+  --chip: #ffffffb3;
+  --link: #2a7ade;
+  --radius: 12px;
+  --tr: color .18s ease, background-color .18s ease, border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+html.dark {
+  --bg1: #0b1220;
+  --bg2: #0a0a0a;
+  --card: #0f172a;
+  --text: #e5e7eb;
+  --muted: #9ca3af;
+  --line: #1f2937;
+  --chip: rgba(255, 255, 255, .06);
+  --link: #93c5fd;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: linear-gradient(var(--bg1), var(--bg2));
+  color: var(--text);
+  transition: var(--tr);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 页面容器 */
+.page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 8px;
+  z-index: 40;
+  padding: 0 6px 10px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  backdrop-filter: blur(6px);
+}
+
+html.dark .topbar {
+  background: rgba(10, 12, 20, 0.55);
+  border: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.subtitle {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* 按钮 */
+.icon-btn {
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 公告条 */
+.pinned {
+  margin-top: 14px;
+  border-radius: 12px;
+  padding: 12px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.announce-icon {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.announce-text {
+  font-weight: 600;
+}
+/* 胶囊样式 */
+.pill {
+  display: inline-block;
+  background-color: hsl(238, 91%, 47%);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 14px;
+  margin: 6px 0;
+  text-align: center;
+}
+
+.pill:hover {
+  background-color: #3b82f6;
+  cursor: pointer;
+}
+
+.date-chip {
+  display: flex;
+  justify-content: center;
+  margin: 18px 0;
+}
+
+.date-chip span {
+  background: var(--chip);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.post {
+  margin: 12px 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 0 6px 20px rgba(2, 6, 23, 0.04);
+}
+
+.media-wrap {
+  width: 100%;
+  overflow: hidden;
+  background: linear-gradient(90deg, #f7fbff, #fff);
+}
+
+.media-wrap img,
+.media-wrap video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.content {
+  padding: 14px;
+}
+
+.post-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.post-sub {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+/* 按钮容器 两列 */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* 当按钮数量为奇数时，最后一个按钮宽度与上面两个按钮总宽度一致 */
+.grid > :nth-child(odd):last-child {
+  grid-column: 1 / -1;
+  width: calc(100% - 10px); /* 总宽度减去一个gap的宽度 */
+  margin: 0 auto; /* 水平居中 */
+}
+/* 按钮样式 */
+.grid a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  text-decoration: none;
+  color: var(--text);
+  background: var(--card);
+}
+
+/* 按钮箭头样式 */
+.grid a .btn-arrow {
+  position: absolute;
+  right: 10px;
+  opacity: .7;
+}
+
+.grid a .btn-label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+.meta .left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.meta .right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.copy-tip {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 22px;
+  background: rgba(0, 0, 0, .75);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s;
+}
+
+.copy-tip.show {
+  opacity: 1;
+  pointer-events: auto;
+}
+/* === Gold icon theme add-on === */
+:root { --gold: #D4AF37; }
+
+/* 左侧浏览数里的“眼睛”图标设为金色（数字仍按原色显示） */
+.meta .left .ico,
+.meta .left .ico .ico-svg {
+  color: var(--gold);
+}
+
+/* 右侧复制按钮图标设为金色 */
+.meta .right .icon-btn {
+  color: var(--gold);
+}
+
+/* 悬停/焦点时稍微提亮（可删） */
+.meta .right .icon-btn:hover,
+.meta .right .icon-btn:focus-visible {
+  filter: brightness(1.12);
+  outline: none;
+}
+/* 覆盖：图像/视频只保留顶部圆角，去掉下方圆角 */
+.media-wrap img,
+.media-wrap video{
+  border-radius: 6px 6px 0 0; /* TL TR BL BR */
+}
+
+/* 覆盖：胶囊圆角与按钮一致（当前按钮是 10px） */
+.pill{
+  border-radius: 8px;
+}
+/* 日期显示（Meta 内联） */
+.meta .date {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums; /* 等宽数字更整齐 */
+}
+.meta .dot { margin: 0 6px; opacity: .45; }
+
+/* 日期分隔条（你已存在 .date-chip 的基础样式，这里补充 hover/阴影可选） */
+.date-chip span {
+  font-variant-numeric: tabular-nums;
+}
+.date-chip span:hover {
+  box-shadow: 0 2px 10px rgba(2,6,23,.06);
+}

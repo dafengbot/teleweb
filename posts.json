@@ -1,0 +1,88 @@
+[
+  {
+    "id": 1,
+    "date": "2025-11-06",
+    "channel": "这搜 - 中文导航 🇨🇳",
+    "textHtml": "<span class=\"pill\">iPHONE  显示英文 解除18+限制方法</span><br><br>打开浏览器进入飞机网页版<br><br><a href=\"https://web.telegram.org\" target=\"_blank\" rel=\"noreferrer\">web.telegram.org</a><br><br>输入telegram绑定的手机号 / 点击 Next 填写验证码 登陆<br><br>❶ 点击 🟰 左上角<br>❷ 点击 ⚙️ Settings<br>❸ 点击 🔒 Privacy and Security<br>❹ 打勾 ✅ Show 18+ Content<br><br>根据图片数字顺序点击即可，完成后手机新打开 Telegram 即可正常观看 😍",
+    "media": {
+      "type": "image",
+      "src": "/imge/18.png",
+      "alt": "Hacker duck with laptop",
+      "href": "https://web.telegram.org/a/"
+    },
+    "buttons": [
+      {
+        "label": "网页版",
+        "href": "https://web.telegram.org/a/"
+      },
+      {
+        "label": "🔍中文搜索",
+        "href": "https://t.me/zhesou"
+      }
+    ],
+    "views": 858969,
+    "time": "13:14"
+  },
+  {
+    "id": 2,
+    "views": 856878,
+    "buttons": [
+      {
+        "label": "搜搜@soso",
+        "href": "https://t.me/soso?start=usecode_jitop"
+      },
+      {
+        "label": "极搜@jiso",
+        "href": "https://t.me/jiso?start=usecode_jitop"
+      }
+    ],
+    "date": "2025-11-07",
+    "time": "5:20",
+    "textHtml": "<span class=\"pill\">推荐：SOSO优惠码 一次绑定终身受益</span><br><br>绑定优惠码 JiTop 即可享受 @soso 和 @jiso&nbsp;广告位的最高折扣。",
+    "media": {
+      "type": "image",
+      "src": "/imge/ads.png",
+      "href": "https://t.me/soso?start=usecode_jitop",
+      "secure": true
+    }
+  },
+  {
+    "id": 3,
+    "date": "2025-11-08",
+    "channel": "这搜 - 中文导航 🇨🇳",
+    "media": {
+      "type": "image",
+      "src": "/imge/zhesou.png",
+      "alt": "Telegram banner"
+    },
+    "buttons": [
+      {
+        "label": "🔍黑料搜索",
+        "href": "https://t.me/zhesou"
+      },
+      {
+        "label": "☁️热门资源",
+        "href": "https://t.me/sosoyunbot?start=hot"
+      },
+      {
+        "label": "🔥热搜吃瓜",
+        "href": "https://t.me/sosochigua"
+      },
+      {
+        "label": "🔞母狗福利",
+        "href": "https://t.me/zhetiao"
+      },
+      {
+        "label": "💎广告中心",
+        "href": "https://t.me/aitebot?start=menu_ads"
+      },
+      {
+        "label": "💬在线客服",
+        "href": "https://t.me/sosoADbot?start=menu_chat"
+      }
+    ],
+    "views": 815873,
+    "time": "20:20",
+    "textHtml": "<span class=\"pill\">🔍这搜・资源搜索 @zhesou</span>"
+  }
+]

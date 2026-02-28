@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>后台 - 51888.ton</title>
+  <style>
+    :root{
+      --bg:#0b1220; --card:#0f172a; --text:#e5e7eb; --muted:#94a3b8; --line:#1f2937; --ok:#16a34a; --bad:#ef4444; --warn:#f59e0b; --accent:#60a5fa;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font:14px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial;background:linear-gradient(#0b1220,#0a0a0a);color:var(--text)}
+
+    /* 密码闸门 */
+    #gate{
+      position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
+      background: radial-gradient(600px 320px at 70% 10%, rgba(96,165,250,.08), transparent 60%), #0b1220;
+      z-index:9999;
+    }
+    .gate-card{
+      width:min(520px, 92vw); background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 16px 12px;
+      box-shadow:0 10px 30px rgba(0,0,0,.35);
+    }
+    .gate-title{margin:0 0 10px; font-size:18px}
+    .gate-row{display:flex; gap:8px; align-items:center; margin:10px 0}
+    .gate-row input[type="password"], .gate-row input[type="text"]{flex:1; background:#0b1020; border:1px solid #334155; border-radius:10px; padding:10px; color:#dbeafe}
+    .gate-row button{appearance:none; border:1px solid #334155; background:#111827; color:var(--text); padding:10px 14px; border-radius:10px; cursor:pointer}
+    .gate-row button:hover{box-shadow:0 0 0 3px rgba(96,165,250,.25)}
+    .gate-foot{display:flex; align-items:center; justify-content:space-between; margin-top:6px; color:#9fb0c8}
+    .small{font-size:12px}
+    .gate-error{margin-top:8px; padding:8px 10px; border-radius:10px; background:rgba(239,68,68,.12); border:1px solid rgba(239,68,68,.35); display:none}
+
+    /* 应用主体 */
+    .wrap{height:100vh;display:none;grid-template-columns:320px 1fr;gap:0}
+    .wrap.show{display:grid}
+    .side{border-right:1px solid var(--line);display:flex;flex-direction:column;min-width:280px}
+    .topbar{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--line);background:#0d1424;position:sticky;top:0;z-index:2}
+    .topbar input[type="text"]{flex:1;background:#0b1020;border:1px solid #334155;border-radius:10px;padding:8px 10px;color:#dbeafe}
+    .btn{appearance:none;border:1px solid #334155;background:#111827;color:var(--text);padding:8px 12px;border-radius:10px;cursor:pointer}
+    .btn:hover{box-shadow:0 0 0 3px rgba(96,165,250,.25)}
+    .btn.sm{padding:6px 8px;border-radius:8px}
+    .btn.danger{border-color:#7f1d1d;background:#1f0f10}
+    .btn.ok{border-color:#14532d;background:#0f1f17}
+    .list{flex:1;overflow:auto}
+    .item{padding:10px;border-bottom:1px solid #162032;display:flex;gap:8px;align-items:center;cursor:pointer}
+    .item.active{background:#0f1a30}
+    .id{width:48px;flex:0 0 48px;color:#cbd5e1}
+    .title{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#e5e7eb}
+
+    .main{display:flex;flex-direction:column;min-width:360px}
+    .toolbar{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--line);background:#0d1424;position:sticky;top:0;z-index:2}
+    .editor{display:grid;grid-template-columns:1fr 400px;gap:14px;padding:12px;overflow:auto}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+    .card h3{margin:0 0 10px;font-size:14px;color:#dbeafe}
+    input[type="text"], input[type="url"], input[type="number"], textarea, select{
+      width:100%;background:#0b1020;border:1px solid #334155;border-radius:10px;padding:8px 10px;color:#dbeafe
+    }
+    textarea{min-height:90px;resize:vertical;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .muted{color:var(--muted)}
+    .status{padding:8px 10px;border-radius:10px;margin:8px 0}
+    .ok{background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.35)}
+    .bad{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.35)}
+    .warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.35)}
+    .kvs{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;color:#cbd5e1;white-space:pre-wrap}
+    .wysi{border:1px solid #334155;border-radius:10px;overflow:hidden;background:#0b1020}
+    .wysi-toolbar{display:flex;gap:6px;flex-wrap:wrap;padding:6px;border-bottom:1px solid #334155;background:#0c1428}
+    .wysi-toolbar button{border:0;background:transparent;color:#dbeafe;padding:6px 8px;border-radius:8px;cursor:pointer}
+    .wysi-toolbar button:hover{background:#0f1f3a}
+    .wysi-area{min-height:160px;padding:10px;outline:none}
+    .pill{display:inline-block;background:#e8f5e9;color:#1b5e20;padding:4px 8px;border-radius:8px;font-weight:600}
+    .hint{font-size:12px;color:#a7b3c7}
+    @media (max-width:1100px){ .editor{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+
+<!-- 密码闸门 -->
+<div id="gate" role="dialog" aria-modal="true">
+  <div class="gate-card">
+    <h2 class="gate-title">进入后台编辑器</h2>
+    <div class="gate-row">
+      <input type="password" id="pw" placeholder="输入密码" autocomplete="current-password" />
+      <button id="enterBtn">进入</button>
+    </div>
+    <div class="gate-foot small">
+      <label><input type="checkbox" id="remember"> 记住（本机）</label>
+      <span>也可使用 <code>?pw=密码</code> 通过 URL 直接进入</span>
+    </div>
+    <div id="gateErr" class="gate-error">密码不正确</div>
+  </div>
+</div>
+
+<!-- 应用主体 -->
+<div class="wrap" id="app">
+  <!-- 左侧：列表 -->
+  <div class="side">
+    <div class="topbar">
+      <button class="btn" id="loadBtn">读取 posts.json</button>
+      <input type="file" id="filePick" accept=".json" style="display:none">
+      <button class="btn" id="pickBtn">选择文件</button>
+      <button class="btn" id="newBtn">新增</button>
+      <button class="btn" id="dupBtn">复制</button>
+      <button class="btn danger" id="delBtn">删除</button>
+    </div>
+    <div id="list" class="list"></div>
+  </div>
+
+  <!-- 右侧：编辑区 -->
+  <div class="main">
+    <div class="toolbar">
+      <button class="btn ok" id="saveLocal">下载为 posts.fixed.json</button>
+      <button class="btn" id="copyJson">复制 JSON</button>
+      <div class="spacer"></div>
+      <button class="btn sm" id="moveUp">上移</button>
+      <button class="btn sm" id="moveDown">下移</button>
+      <button class="btn sm" id="validate">校验</button>
+    </div>
+
+    <div class="editor">
+      <!-- 基本信息 -->
+      <div class="card">
+        <h3>基本信息</h3>
+        <div class="grid2">
+          <label>id（数字自增）
+            <input type="number" id="f-id" min="1" step="1" />
+          </label>
+          <label>date（YYYY-MM-DD）
+            <input type="text" id="f-date" placeholder="2025-11-02" />
+          </label>
+        </div>
+        <div class="grid2" style="margin-top:8px">
+          <label>channel
+            <input type="text" id="f-channel" placeholder="这搜 - 中文导航 🇨🇳" />
+          </label>
+          <label>time（可选）
+            <input type="text" id="f-time" placeholder="13:14" />
+          </label>
+        </div>
+
+        <!-- NEW: views -->
+        <div class="grid2" style="margin-top:8px">
+          <label>title（可选）
+            <input type="text" id="f-title" placeholder="标题…" />
+          </label>
+          <label>views（浏览数）
+            <input type="number" id="f-views" min="0" step="1" placeholder="0" />
+          </label>
+        </div>
+
+        <label style="margin-top:8px">text（纯文本，可选）
+          <textarea id="f-text" placeholder="纯文本"></textarea>
+        </label>
+      </div>
+
+      <!-- 富文本 -->
+      <div class="card">
+        <h3>富文本（textHtml）</h3>
+        <div class="wysi">
+          <div class="wysi-toolbar">
+            <button data-cmd="bold"><b>B</b></button>
+            <button data-cmd="italic"><i>I</i></button>
+            <button data-cmd="underline"><u>U</u></button>
+            <button id="btnLink">链接</button>
+            <button id="btnPill">胶囊</button>
+            <button id="btnBr">换行&lt;br&gt;</button>
+            <button id="btnClear">清空</button>
+            <!-- 新增：字体颜色 -->
+            <button id="btnColor" class="color-picker">字体颜色</button>
+          </div>
+          <div id="wysi" class="wysi-area" contenteditable="true" spellcheck="false" placeholder="在此编辑 textHtml…"></div>
+        </div>
+        <div class="hint" style="margin-top:6px">此处 HTML 将保存到 <code>textHtml</code>。若留空，则使用 <code>text</code>/<code>title</code>。</div>
+      </div>
+
+      <!-- 媒体 -->
+      <div class="card">
+        <h3>媒体</h3>
+        <div class="grid2">
+          <label>type
+            <select id="m-type">
+              <option value="">无</option>
+              <option value="image">image</option>
+              <option value="video">video</option>
+            </select>
+          </label>
+          <label>alt
+            <input type="text" id="m-alt" placeholder="Alt 文本" />
+          </label>
+        </div>
+        <label style="margin-top:8px">src
+          <input type="url" id="m-src" placeholder="https://…" />
+        </label>
+        <div class="grid2" style="margin-top:8px">
+          <label>href（点击跳转）
+            <input type="url" id="m-href" placeholder="https://…" />
+          </label>
+          <label>secure / watermark
+            <div class="row" style="gap:12px">
+              <label><input type="checkbox" id="m-secure"> secure</label>
+              <label><input type="checkbox" id="m-watermark"> watermark</label>
+            </div>
+          </label>
+        </div>
+        <label style="margin-top:8px">watermarkText
+          <input type="text" id="m-wmtext" placeholder="© 51888.ton" />
+        </label>
+      </div>
+
+      <!-- 按钮组 -->
+      <div class="card">
+        <h3>按钮（buttons）</h3>
+        <div id="btnList"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn sm" id="addBtnRow">新增按钮</button>
+          <span class="hint">每项需要 <code>label</code> 与 <code>href</code>。</span>
+        </div>
+      </div>
+
+      <!-- 校验 -->
+      <div class="card">
+        <h3>校验/统计</h3>
+        <div id="status" class="status warn">尚未校验。</div>
+        <div class="grid2" style="margin-top:8px">
+          <div>
+            <div class="muted">统计</div>
+            <div id="stats" class="kvs">—</div>
+          </div>
+          <div>
+            <div class="muted">ID / 日期</div>
+            <div id="ids" class="kvs">—</div>
+            <div id="dates" class="kvs" style="margin-top:6px">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // 富文本编辑器中选择字体颜色
+  document.getElementById('btnColor').addEventListener('click', () => {
+    const color = prompt('请输入颜色（例如：#ff0000 或 red）：');
+    if (color) {
+      document.execCommand('foreColor', false, color);
+    }
+  });
+  
+  /** --------------------
+   *  密码闸门（弱防护）
+   *  默认密码：123456
+   *  将 PASS_HASH 替换成你自己的密码的 SHA-256(hex)
+   * -------------------- */
+  const PASS_HASH = '0da30567fd63340f88cb938ea920c2a3e9dc52f9e33496a1f9a839aeed71339d'; 
+  const REMEMBER_KEY = 'admin_gate_passed';
+
+  const $ = s => document.querySelector(s);
+
+  /** SHA-256 -> hex */
+  async function sha256Hex (txt) {
+    const enc = new TextEncoder().encode(txt);
+    const buf = await crypto.subtle.digest('SHA-256', enc);
+    const arr = Array.from(new Uint8Array(buf));
+    return arr.map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+
+  async function tryEnterWith(pw, remember){
+    const hash = await sha256Hex(pw || '');
+    if (hash === PASS_HASH) {
+      if (remember) {
+        try { localStorage.setItem(REMEMBER_KEY, '1'); } catch(_) {}
+      }
+      $('#gate').style.display = 'none';
+      $('#app').classList.add('show');
+      return true;
+    } else {
+      $('#gateErr').style.display = 'block';
+      return false;
+    }
+  }
+
+  (async function gateInit(){
+    try {
+      if (localStorage.getItem(REMEMBER_KEY) === '1') {
+        $('#gate').style.display = 'none';
+        $('#app').classList.add('show');
+        return;
+      }
+    } catch(_){}
+
+    const sp = new URLSearchParams(location.search);
+    const pwParam = sp.get('pw');
+    if (pwParam) {
+      const ok = await tryEnterWith(pwParam, true);
+      if (ok) return;
+    }
+
+    $('#enterBtn').addEventListener('click', async ()=>{
+      const pw = $('#pw').value.trim();
+      const remember = $('#remember').checked;
+      await tryEnterWith(pw, remember);
+    });
+    $('#pw').addEventListener('keydown', async (e)=>{
+      if (e.key === 'Enter') {
+        const remember = $('#remember').checked;
+        await tryEnterWith(e.target.value.trim(), remember);
+      }
+    });
+  })();
+
+  /** --------------------
+   *  下面是可视化编辑器逻辑
+   * -------------------- */
+  let data = [];
+  let cur = -1;
+
+  const list = $('#list');
+  const statusBox = $('#status'), statsBox=$('#stats'), idsBox=$('#ids'), datesBox=$('#dates');
+  const f_id=$('#f-id'), f_date=$('#f-date'), f_channel=$('#f-channel'), f_time=$('#f-time');
+  const f_title=$('#f-title'), f_text=$('#f-text');
+  const f_views=$('#f-views'); // NEW: views
+  const wysi=$('#wysi');
+  const m_type=$('#m-type'), m_alt=$('#m-alt'), m_src=$('#m-src'), m_href=$('#m-href');
+  const m_secure=$('#m-secure'), m_watermark=$('#m-watermark'), m_wmtext=$('#m-wmtext');
+  const btnList=$('#btnList');
+
+  function setStatus(type, msg){ statusBox.className='status '+(type||'warn'); statusBox.innerHTML=msg; }
+  function escapeHtml(s){ return String(s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function escapeAttr(s){ return String(s??'').replace(/"/g,'&quot;'); }
+  function stripHtml(s){ return (s||'').replace(/<[^>]*>/g,'').trim(); }
+  function cloneObj(o){ return JSON.parse(JSON.stringify(o)); }
+  function nextId(){ const ids = data.map(x=>Number(x.id)).filter(Number.isFinite); return ids.length ? Math.max(...ids)+1 : 1; }
+
+  function refreshList(){
+    list.innerHTML = '';
+    data.forEach((it, i)=>{
+      const el = document.createElement('div');
+      el.className = 'item' + (i===cur ? ' active' : '');
+      el.innerHTML = `<div class="id">#${it.id??'?'}</div><div class="title">${escapeHtml(it.title||it.text||stripHtml(it.textHtml)||'(无标题)')}</div>`;
+      el.onclick = ()=>{ saveCurrentToModel(); cur=i; refreshList(); loadToForm(); };
+      list.appendChild(el);
+    });
+  }
+
+  function loadToForm(){
+    if(cur<0 || !data[cur]) return;
+    const it = data[cur];
+    f_id.value = it.id ?? '';
+    f_date.value = it.date ?? '';
+    f_channel.value = it.channel ?? '';
+    f_time.value = it.time ?? '';
+    f_title.value = it.title ?? '';
+    f_text.value = it.text ?? '';
+    f_views.value = Number.isFinite(Number(it.views)) ? Number(it.views) : ''; // NEW: views
+    wysi.innerHTML = it.textHtml ?? '';
+    m_type.value = it.media?.type ?? '';
+    m_alt.value  = it.media?.alt ?? '';
+    m_src.value  = it.media?.src ?? '';
+    m_href.value = it.media?.href ?? '';
+    m_secure.checked = !!it.media?.secure;
+    m_watermark.checked = !!it.media?.watermark;
+    m_wmtext.value = it.media?.watermarkText ?? '';
+    renderButtons(it.buttons || []);
+  }
+
+  function renderButtons(arr){
+    btnList.innerHTML = '';
+    (arr||[]).forEach((b, i)=>{
+      const row = document.createElement('div');
+      row.className='row';
+      row.innerHTML = `
+        <input type="text" placeholder="label" value="${escapeAttr(b.label||'')}" style="flex:1">
+        <input type="url" placeholder="href" value="${escapeAttr(b.href||'')}" style="flex:2">
+        <button class="btn sm">删</button>
+      `;
+      row.querySelector('.btn').onclick = ()=>{
+        const it = data[cur];
+        it.buttons.splice(i,1);
+        renderButtons(it.buttons);
+        refreshList();
+      };
+      btnList.appendChild(row);
+    });
+  }
+
+  function saveCurrentToModel(){
+    if(cur<0 || !data[cur]) return;
+    const it = data[cur];
+    it.id = Number(f_id.value)||nextId();
+    it.date = f_date.value.trim()||undefined;
+    it.channel = f_channel.value.trim()||undefined;
+    it.time = f_time.value.trim()||undefined;
+    it.title = f_title.value.trim()||undefined;
+    it.text = f_text.value.trim()||undefined;
+
+    // NEW: views
+    const v = Number(f_views.value);
+    it.views = Number.isFinite(v) && v >= 0 ? Math.floor(v) : undefined;
+
+    const html = wysi.innerHTML.trim(); it.textHtml = html || undefined;
+
+    if(m_type.value){
+      it.media = it.media || {};
+      it.media.type = m_type.value;
+      it.media.alt = m_alt.value.trim()||undefined;
+      it.media.src = m_src.value.trim()||'';
+      it.media.href= m_href.value.trim()||undefined;
+      it.media.secure = m_secure.checked || undefined;
+      it.media.watermark = m_watermark.checked || undefined;
+      it.media.watermarkText = m_wmtext.value.trim()||undefined;
+    }else{ it.media = undefined; }
+
+    const rows = btnList.querySelectorAll('.row');
+    const arr = [];
+    rows.forEach(r=>{
+      const [label, href] = r.querySelectorAll('input');
+      if(label.value.trim() && href.value.trim()){
+        arr.push({ label: label.value.trim(), href: href.value.trim() });
+      }
+    });
+    it.buttons = arr.length ? arr : undefined;
+  }
+
+  function validateAll(arr){
+    const errors=[], warns=[]; const ids=new Set(); const idList=[]; const dateInfo={ok:0,bad:0,empty:0};
+    if(!Array.isArray(arr)){ errors.push('根节点必须是数组'); return {errors,warns,idList,dateInfo}; }
+    arr.forEach((item, idx)=>{
+      const p=`[${idx}]`;
+      const id=Number(item.id);
+      if(!Number.isFinite(id)||id<=0) errors.push(`${p}.id 必须是>0数字`);
+      else { if(ids.has(id)) errors.push(`${p}.id 重复: ${id}`); ids.add(id); idList.push(id); }
+      if(!(item.title || item.text || item.textHtml)) errors.push(`${p} 需要 title/text/textHtml 之一`);
+
+      if(item.date){ const t=new Date(item.date).getTime(); if(Number.isNaN(t)){errors.push(`${p}.date 无法解析`); dateInfo.bad++;} else dateInfo.ok++; }
+      else dateInfo.empty++;
+
+      // NEW: views 校验
+      if(item.views!=null){
+        const vv = Number(item.views);
+        if(!Number.isFinite(vv) || vv < 0) errors.push(`${p}.views 必须为 >=0 的整数`);
+      }
+
+      if(item.media){
+        if(item.media.type!=='image' && item.media.type!=='video') errors.push(`${p}.media.type 必须 image|video`);
+        if(!item.media.src) errors.push(`${p}.media.src 不能为空`);
+      }
+      if(item.buttons!=null){
+        if(!Array.isArray(item.buttons)) errors.push(`${p}.buttons 必须数组`);
+        else {
+          item.buttons.forEach((b,i)=>{
+            if(!b || typeof b!=='object') errors.push(`${p}.buttons[${i}] 必须对象`);
+            else{
+              if(!b.label) errors.push(`${p}.buttons[${i}].label 不能为空`);
+              if(!b.href)  errors.push(`${p}.buttons[${i}].href 不能为空`);
+            }
+          });
+          if(item.buttons.length>12) warns.push(`${p}.buttons 多(${item.buttons.length})，移动端可能换行过多`);
+        }
+      }
+    });
+    return {errors,warns,idList,dateInfo};
+  }
+
+  function showStats(res, arr){
+    const ok = !res.errors.length;
+    setStatus(ok?'ok':'bad', (ok?'✅ 校验通过':`❌ 错误 ${res.errors.length} 个`) + (res.warns.length? `；⚠️ 提示 ${res.warns.length} 条`:''));
+
+    // NEW: 汇总 views
+    let totalViews = 0;
+    if (Array.isArray(arr)) {
+      for (const it of arr) {
+        const vv = Number(it?.views);
+        if (Number.isFinite(vv) && vv >= 0) totalViews += Math.floor(vv);
+      }
+    }
+
+    statsBox.textContent = `条目：${Array.isArray(arr)?arr.length:0}\n错误：${res.errors.length}\n提示：${res.warns.length}\n总浏览：${totalViews}`;
+
+    if(res.idList.length){
+      res.idList.sort((a,b)=>a-b);
+      const gaps=[]; for(let i=1;i<res.idList.length;i++){const a=res.idList[i-1], b=res.idList[i]; for(let k=a+1;k<b;k++) gaps.push(k); }
+      idsBox.textContent = `最小ID：${res.idList[0]}\n最大ID：${res.idList[res.idList.length-1]}\n是否连续：${gaps.length?'否':'是'}${gaps.length? '\n缺失：'+gaps.join(', '):''}`;
+    }else idsBox.textContent='—';
+
+    datesBox.textContent = `有日期：${res.dateInfo.ok}\n无日期：${res.dateInfo.empty}\n解析失败：${res.dateInfo.bad}`;
+  }
+
+  /* 事件：左侧控制 */
+  $('#loadBtn').onclick = async ()=>{
+    try{
+      const res = await fetch('posts.json?ts='+Date.now(), {cache:'no-store'});
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      data = await res.json();
+      if(!Array.isArray(data)) throw new Error('posts.json 不是数组');
+      data.sort((a,b)=>Number(a.id)-Number(b.id));
+      cur = 0; refreshList(); loadToForm();
+      setStatus('ok','已加载 posts.json');
+    }catch(e){ setStatus('bad','读取失败：'+e.message); }
+  };
+  $('#pickBtn').onclick = ()=> $('#filePick').click();
+  $('#filePick').addEventListener('change', e=>{
+    const f = e.target.files[0]; if(!f) return;
+    const fr = new FileReader();
+    fr.onload = ()=>{ try{
+      data = JSON.parse(fr.result); data.sort((a,b)=>Number(a.id)-Number(b.id)); cur=0; refreshList(); loadToForm(); setStatus('ok','已从文件载入');
+    }catch(err){ setStatus('bad','JSON 解析失败：'+err.message); } };
+    fr.readAsText(f, 'utf-8');
+  });
+  $('#newBtn').onclick = ()=>{ saveCurrentToModel(); const it={id:nextId(), title:'(新建)', views:0}; data.push(it); cur=data.length-1; refreshList(); loadToForm(); }; // NEW: 默认 views=0
+  $('#dupBtn').onclick = ()=>{ if(cur<0) return; saveCurrentToModel(); const cp=cloneObj(data[cur]); cp.id=nextId(); data.splice(cur+1,0,cp); cur=cur+1; refreshList(); loadToForm(); };
+  $('#delBtn').onclick = ()=>{ if(cur<0) return; if(!confirm('确定删除当前条目？')) return; data.splice(cur,1); cur=Math.min(cur,data.length-1); refreshList(); loadToForm(); };
+
+  $('#moveUp').onclick = ()=>{ if(cur>0){ saveCurrentToModel(); [data[cur-1],data[cur]]=[data[cur],data[cur-1]]; cur--; refreshList(); loadToForm(); } };
+  $('#moveDown').onclick = ()=>{ if(cur>=0 && cur<data.length-1){ saveCurrentToModel(); [data[cur+1],data[cur]]=[data[cur],data[cur+1]]; cur++; refreshList(); loadToForm(); } };
+
+  $('#addBtnRow').onclick = ()=>{ if(cur<0) return; const it=data[cur]; it.buttons=it.buttons||[]; it.buttons.push({label:'',href:''}); renderButtons(it.buttons); };
+
+  document.querySelectorAll('.wysi-toolbar [data-cmd]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{ document.execCommand(btn.dataset.cmd, false, null); wysi.focus(); });
+  });
+  $('#btnLink').onclick = ()=>{ const url=prompt('输入链接：','https://'); if(url){ document.execCommand('createLink', false, url); } wysi.focus(); };
+  $('#btnPill').onclick = ()=>{ const sel=window.getSelection(); const txt=(sel&&sel.toString())||'胶囊标题'; pasteHtmlAtCaret(`<span class="pill">${escapeHtml(txt)}</span>`); wysi.focus(); };
+  $('#btnBr').onclick = ()=>{ pasteHtmlAtCaret('<br>'); wysi.focus(); };
+  $('#btnClear').onclick = ()=>{ if(confirm('清空富文本？')) wysi.innerHTML=''; };
+
+  function pasteHtmlAtCaret(html){
+    wysi.focus();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return;
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const el = document.createElement('div');
+    el.innerHTML = html;
+    const frag = document.createDocumentFragment();
+    let node, lastNode;
+    while ((node = el.firstChild)) { lastNode = frag.appendChild(node); }
+    range.insertNode(frag);
+    if (lastNode) {
+      const r = document.createRange();
+      r.setStartAfter(lastNode); r.collapse(true);
+      sel.removeAllRanges(); sel.addRange(r);
+    }
+  }
+
+  $('#validate').onclick = ()=>{ saveCurrentToModel(); const res=validateAll(data); showStats(res, data); };
+  $('#saveLocal').onclick = ()=>{
+    saveCurrentToModel();
+    const res=validateAll(data);
+    if(res.errors.length){ showStats(res, data); alert('有错误，请先修复。'); return; }
+    const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob); const a=document.createElement('a');
+    a.download='posts.fixed.json'; a.href=url; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    setStatus('ok','已下载 posts.fixed.json');
+  };
+  $('#copyJson').onclick = async ()=>{
+    saveCurrentToModel();
+    try{
+      await navigator.clipboard.writeText(JSON.stringify(data,null,2));
+      setStatus('ok','已复制 JSON 到剪贴板');
+    }catch(e){ setStatus('bad','复制失败：'+e.message); }
+  };
+
+  /* 初始放一条示例，便于离线编辑 */
+  window.addEventListener('DOMContentLoaded', ()=>{
+    if(!data.length){
+      data = [{ id: 1, date: "2025-11-02", title: "示例标题", text: "这是一个示例。点击左上角读取 posts.json，或用“选择文件/粘贴”加载。", views: 0 }]; // NEW: views
+      cur = 0; refreshList(); loadToForm();
+      setStatus('warn','已载入示例。');
+    }
+  });
+</script>
+</body>
+</html>
